@@ -1,0 +1,68 @@
+#
+# Ficheiro de configuração aula 10
+
+#Mostra o nome do servidor
+
+visible_hostname SRV_SR1
+
+#Acesso só à minha rede local
+acl rede_local src 192.168.20.0/24 
+
+#Acesso aos seguintes portos
+
+acl SSL_ports port 443
+acl Safe_ports port 80		# http
+acl Safe_ports port 21		# ftp
+acl Safe_ports port 443		# https
+acl Safe_ports port 210		# wais
+acl Safe_ports port 1025-65535	# unregistered ports
+acl Safe_ports port 280		# http-mgmt
+acl Safe_ports port 488		# gss-http
+acl Safe_ports port 777		# multiling http
+acl CONNECT method CONNECT
+
+#Bloquear o Sites - Ficheiros localizados numa pasta chamada bloqueados
+
+acl externo dstdomain "c:\squid\var\bloqueados\bloq.txt"
+acl palavras url_regex -i "c:\squid\var\bloqueados\bloq1.txt"
+
+
+# Acesso a gestão apenas no local host
+http_access allow localhost manager
+http_access deny manager
+
+# Nega o acesso a todos os portos que não estejam como Safe
+
+http_access deny !Safe_ports
+
+# Deny CONNECT to other than secure SSL ports
+http_access deny CONNECT !SSL_ports
+
+# Negar o acesso aos sites
+http_access deny externo
+http_access deny palavras
+
+# We strongly recommend the following be uncommented to protect innocent
+# web applications running on the proxy server who think the only
+# one who can access services on "localhost" is a local user
+http_access deny to_localhost
+
+#Permite op acesso à minha rede e ao local host
+http_access allow rede_local
+http_access allow localhost
+
+
+# Nega o acesso a tudso o resto
+http_access deny all
+
+# Port do Squid
+http_port 3128
+
+#Servidores de DNS
+
+dns_nameservers 8.8.8.8 1.1.1.1
+
+#Converte as mensagens de erro para Português
+error_directory /usr/share/squid/errors/pt-pt
+
+max_filedescriptors 3200
